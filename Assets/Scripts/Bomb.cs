@@ -2,8 +2,10 @@
 
 public class Bomb : MonoBehaviour
 {
-    [SerializeField] private uint memoryConsumptionInBytes = 10;
-    private int[] memoryConsumption;
+    [SerializeField] private uint memoryConsumptionInBytes;
+    [SerializeField] private float detonationTimeAfterContact;
+    
+    private byte[] memoryConsumption;
 
     private void OnEnable()
     {
@@ -12,14 +14,16 @@ public class Bomb : MonoBehaviour
 
     private void EatRam(uint bytes)
     {
-        this.memoryConsumption = new int[bytes];
+        this.memoryConsumption = new byte[bytes];
 
         for (int index = 0; index < this.memoryConsumption.Length; index++)
-            this.memoryConsumption[index] = index;
+        {
+            this.memoryConsumption[index] = 0;
+        }
     }
 
     private void OnCollisionEnter(Collision other)
     {
-        
+        Destroy(this.gameObject, this.detonationTimeAfterContact);
     }
 }

@@ -24,6 +24,12 @@ public class Bomb : MonoBehaviour
 
     private void OnCollisionEnter(Collision other)
     {
-        Destroy(this.gameObject, this.detonationTimeAfterContact);
+        // Disable bomb after 1.5 seconds when it collides whit the flor
+        Invoke(nameof(this.Disable), 1.5f);
+    }
+
+    private void Disable()
+    {
+        this.gameObject.SetActive(false);
     }
 }

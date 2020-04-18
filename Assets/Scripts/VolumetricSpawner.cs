@@ -8,14 +8,28 @@ public class VolumetricSpawner : MonoBehaviour
     [SerializeField] private Collider spawnVolume;
     
     [Space]
-    [SerializeField] private GameObject bombPrefab;
+    [SerializeField] private Bomb bombPrefab;
     [SerializeField] private float spawnInterval;
-    
+
     private float timeSinceLastBomb;
+    
+    // Pooling improvements
+    [SerializeField] private uint bombsAmount;
+    
+    private Bomb[] instantiatedBombs;
 
     private void Awake()
     {
         this.timeSinceLastBomb = 0;
+
+        // Create and populate bombs 
+        this.instantiatedBombs = new Bomb[this.bombsAmount];
+        
+        for (int index = 0; index < this.instantiatedBombs.Length; index++)
+        {
+            this.instantiatedBombs[index] = Instantiate(this.bombPrefab, this.transform.position, Quaternion.identity);
+            this.instantiatedBombs[index]?.gameObject.SetActive(false); // Disable bomb 
+        }
     }
 
     private void Update()
@@ -36,7 +50,17 @@ public class VolumetricSpawner : MonoBehaviour
         if (targetBounds != null)
         {
             Vector3 spawnPosition = this.RandomPointInBounds(targetBounds.Value);
-            GameObject.Instantiate(this.bombPrefab, spawnPosition, Quaternion.identity);
+
+            // Get the bomb if its not active, give it a new position and activate it
+            foreach (Bomb current in this.instantiatedBombs)
+            {
+                if (!current.isActiveAndEnabled)
+                {
+                    current.transform.SetPositionAndRotation(spawnPosition, Quaternion.identity);
+                    current.gameObject.SetActive(true);
+                    break; // Break so we use only one bomb
+                }
+            }
         }
         else
         {

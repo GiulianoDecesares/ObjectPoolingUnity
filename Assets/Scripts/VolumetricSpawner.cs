@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class VolumetricSpawner : MonoBehaviour
@@ -13,29 +14,22 @@ public class VolumetricSpawner : MonoBehaviour
 
     private float timeSinceLastBomb;
     
-    // Pooling improvements
-    [SerializeField] private uint bombsAmount;
-    
-    private Bomb[] instantiatedBombs;
+    private List<Bomb> instantiatedBombs; // Pool 
 
     private void Awake()
     {
         this.timeSinceLastBomb = 0;
 
         // Create and populate bombs 
-        this.instantiatedBombs = new Bomb[this.bombsAmount];
-        
-        for (int index = 0; index < this.instantiatedBombs.Length; index++)
-        {
-            this.instantiatedBombs[index] = Instantiate(this.bombPrefab, this.transform.position, Quaternion.identity);
-            this.instantiatedBombs[index]?.gameObject.SetActive(false); // Disable bomb 
-        }
+        this.instantiatedBombs = new List<Bomb>(); // Pool
     }
 
     private void Update()
     {
         if (Time.time - this.timeSinceLastBomb > this.spawnInterval)
         {
+            Debug.Log($"Bombs amount is {this.instantiatedBombs.Count}");
+            
             this.SpawnBomb();
         }
     }
@@ -50,22 +44,29 @@ public class VolumetricSpawner : MonoBehaviour
         if (targetBounds != null)
         {
             Vector3 spawnPosition = this.RandomPointInBounds(targetBounds.Value);
-
-            // Get the bomb if its not active, give it a new position and activate it
-            foreach (Bomb current in this.instantiatedBombs)
-            {
-                if (!current.isActiveAndEnabled)
-                {
-                    current.transform.SetPositionAndRotation(spawnPosition, Quaternion.identity);
-                    current.gameObject.SetActive(true);
-                    break; // Break so we use only one bomb
-                }
-            }
+            this.InstantiateBomb(spawnPosition);
         }
         else
         {
             Debug.LogError("Null target bounds");
         }
+    }
+
+    // Pool
+    private void InstantiateBomb(Vector3 position)
+    {
+        // Get the bomb if its not active, give it a new position and activate it
+        Bomb inactiveBomb = this.instantiatedBombs.FirstOrDefault(current => !current.isActiveAndEnabled);
+
+        if (inactiveBomb == null)
+        {
+            inactiveBomb = Instantiate(this.bombPrefab, position, Quaternion.identity);
+            inactiveBomb.gameObject.SetActive(false);
+            this.instantiatedBombs.Add(inactiveBomb);
+        }
+        
+        inactiveBomb.transform.SetPositionAndRotation(position, Quaternion.identity);
+        inactiveBomb.gameObject.SetActive(true);
     }
     
     private Vector3 RandomPointInBounds(Bounds bounds) {

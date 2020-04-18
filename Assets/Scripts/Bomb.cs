@@ -1,9 +1,11 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
-public class Bomb : MonoBehaviour
+public class Bomb : MonoBehaviour, IReusable
 {
     [SerializeField] private uint memoryConsumptionInBytes;
-    [SerializeField] private float detonationTimeAfterContact;
+    
+    public event Action<IReusable> OnReleased;
     
     private byte[] memoryConsumption;
 
@@ -30,6 +32,7 @@ public class Bomb : MonoBehaviour
 
     private void Disable()
     {
+        this.OnReleased?.Invoke(this);
         this.gameObject.SetActive(false);
     }
 }

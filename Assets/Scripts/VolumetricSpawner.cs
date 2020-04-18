@@ -7,19 +7,18 @@ using UnityEngine;
 public class VolumetricSpawner : MonoBehaviour
 {
     [SerializeField] private Collider spawnVolume;
-    
-    [Space]
-    [SerializeField] private Bomb bombPrefab;
     [SerializeField] private float spawnInterval;
+
+    [SerializeField] private Bomb bombPrefab;
 
     private float timeSinceLastBomb;
 
-    private GameObjectPool bombPool;
+    private ObjectPool<Bomb> bombPool;
 
     private void Awake()
     {
         this.timeSinceLastBomb = 0;
-        this.bombPool = new GameObjectPool(this.bombPrefab.gameObject);
+        this.bombPool = new ObjectPool<Bomb>(new BombCreator(this.bombPrefab));
     }
 
     private void Update()
@@ -40,12 +39,12 @@ public class VolumetricSpawner : MonoBehaviour
         if (targetBounds != null)
         {
             Vector3 spawnPosition = this.RandomPointInBounds(targetBounds.Value);
-            GameObject bomb = this.bombPool.GetGameObject();
+            Bomb bomb = this.bombPool.GetGameObject();
             
             if (bomb != null)
             {
                 bomb.transform.SetPositionAndRotation(spawnPosition, Quaternion.identity);
-                bomb.SetActive(true);
+                bomb.gameObject.SetActive(true);
             }
         }
         else

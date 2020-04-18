@@ -13,23 +13,19 @@ public class VolumetricSpawner : MonoBehaviour
     [SerializeField] private float spawnInterval;
 
     private float timeSinceLastBomb;
-    
-    private List<Bomb> instantiatedBombs; // Pool 
+
+    private GameObjectPool bombPool;
 
     private void Awake()
     {
         this.timeSinceLastBomb = 0;
-
-        // Create and populate bombs 
-        this.instantiatedBombs = new List<Bomb>(); // Pool
+        this.bombPool = new GameObjectPool(this.bombPrefab.gameObject);
     }
 
     private void Update()
     {
         if (Time.time - this.timeSinceLastBomb > this.spawnInterval)
         {
-            Debug.Log($"Bombs amount is {this.instantiatedBombs.Count}");
-            
             this.SpawnBomb();
         }
     }
@@ -44,29 +40,18 @@ public class VolumetricSpawner : MonoBehaviour
         if (targetBounds != null)
         {
             Vector3 spawnPosition = this.RandomPointInBounds(targetBounds.Value);
-            this.InstantiateBomb(spawnPosition);
+            GameObject bomb = this.bombPool.GetGameObject();
+            
+            if (bomb != null)
+            {
+                bomb.transform.SetPositionAndRotation(spawnPosition, Quaternion.identity);
+                bomb.SetActive(true);
+            }
         }
         else
         {
             Debug.LogError("Null target bounds");
         }
-    }
-
-    // Pool
-    private void InstantiateBomb(Vector3 position)
-    {
-        // Get the bomb if its not active, give it a new position and activate it
-        Bomb inactiveBomb = this.instantiatedBombs.FirstOrDefault(current => !current.isActiveAndEnabled);
-
-        if (inactiveBomb == null)
-        {
-            inactiveBomb = Instantiate(this.bombPrefab, position, Quaternion.identity);
-            inactiveBomb.gameObject.SetActive(false);
-            this.instantiatedBombs.Add(inactiveBomb);
-        }
-        
-        inactiveBomb.transform.SetPositionAndRotation(position, Quaternion.identity);
-        inactiveBomb.gameObject.SetActive(true);
     }
     
     private Vector3 RandomPointInBounds(Bounds bounds) {

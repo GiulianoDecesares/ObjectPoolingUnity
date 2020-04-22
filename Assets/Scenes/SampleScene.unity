@@ -228,7 +228,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   spawnVolume: {fileID: 358125054}
-  spawnInterval: 0.1
+  spawnInterval: 0.01
   bombPrefab: {fileID: 8464979061404652298, guid: d45038c4583776146a6999bc8c5c6745,
     type: 3}
 --- !u!1 &705507993
@@ -358,7 +358,7 @@ Camera:
   m_GameObject: {fileID: 963194225}
   m_Enabled: 1
   serializedVersion: 2
-  m_ClearFlags: 1
+  m_ClearFlags: 2
   m_BackGroundColor: {r: 0.19215687, g: 0.3019608, b: 0.4745098, a: 0}
   m_projectionMatrixMode: 1
   m_GateFitMode: 2

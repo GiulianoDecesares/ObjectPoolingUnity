@@ -6,6 +6,8 @@ public class VolumetricSpawner : MonoBehaviour
     [SerializeField] private float spawnInterval;
     [SerializeField] private Bomb bombPrefab;
 
+    [SerializeField] private AnimationCurve plot;
+
     private float timeSinceLastBomb;
     private ObjectPool<Bomb> bombPool;
 
@@ -13,6 +15,7 @@ public class VolumetricSpawner : MonoBehaviour
     {
         this.timeSinceLastBomb = 0;
         this.bombPool = new ObjectPool<Bomb>(this.bombPrefab);
+        this.plot = new AnimationCurve();
     }
 
     private void Update()
@@ -21,6 +24,9 @@ public class VolumetricSpawner : MonoBehaviour
         {
             this.SpawnBomb();
         }
+        
+        // Debug objects amount
+        this.plot.AddKey(Time.realtimeSinceStartup, this.bombPool.Size());
     }
 
     private Vector3 GetBombRandomPosition()
